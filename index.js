@@ -1,19 +1,36 @@
+const express = require("express");
 const TelegramBot = require("node-telegram-bot-api");
 
-// .env ishlatmasdan to'g'ridan-to'g'ri yozamiz:
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Tokenni bevosita yozamiz (agar .env ishlamayotgan bo‘lsa)
 const token = "8110277054:AAGlsNUWbpYJBKJnseAYuOP5UPGwozkbi1M";
 
-const bot = new TelegramBot(token, { polling: true });
+// Botni webhook rejimida ishga tushiramiz
+const bot = new TelegramBot(token);
+bot.setWebHook(`https://<RENDER-APP-NOMI>.onrender.com/bot${token}`);
 
-bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "Assalomu alaykum! Men ishga tushdim 🚀");
+// Telegram webhookni qabul qiladigan endpoint
+app.use(express.json());
+app.post(`/bot${token}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
 });
 
-bot.on("message", (msg) => {
+// /start komandasi
+bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  const text = msg.text;
+  bot.sendMessage(chatId, "Salom! Webhook orqali ishga tushdim 🚀");
+});
 
-  if (text !== "/start") {
-    bot.sendMessage(chatId, `Siz yozdingiz: ${text}`);
+// Oddiy matn
+bot.on("message", (msg) => {
+  if (msg.text !== "/start") {
+    bot.sendMessage(msg.chat.id, `Siz yozdingiz: ${msg.text}`);
   }
+});
+
+app.listen(port, () => {
+  console.log(`Server ishga tushdi: ${port}`);
 });
