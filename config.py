@@ -2,7 +2,6 @@
 BOT_TOKEN = "8110277054:AAGlsNUWbpYJBKJnseAYuOP5UPGwozkbi1M"
 ADMIN_ID = 1982638634
 
-# Language texts
 LANGUAGES = {
     'uz': {
         'welcome': '🎉 Xush kelibsiz, {}!\n\n📱 Bu bot Instagram va TikTok videolarini yuklab olish uchun ishlatiladi.\n\n📤 Video havolasini yuboring va men uni sizga yuklab beraman.\n\n💡 Qo\'llash:\n• Instagram video havolasini yuboring\n• TikTok video havolasini yuboring\n• Video avtomatik ravishda yuklab olinadi',
