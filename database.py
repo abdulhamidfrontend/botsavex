@@ -9,7 +9,12 @@ from typing import Dict, Any, Optional
 
 class SimpleDatabase:
     def __init__(self, db_file: str = "user_data.json"):
-        self.db_file = db_file
+        # Use absolute path for Render deployment
+        if os.getenv("RENDER"):
+            # On Render, use /tmp directory for file storage
+            self.db_file = os.path.join("/tmp", db_file)
+        else:
+            self.db_file = db_file
         self.data = self._load_data()
     
     def _load_data(self) -> Dict[str, Any]:
@@ -25,6 +30,8 @@ class SimpleDatabase:
     def _save_data(self):
         """Save data to JSON file"""
         try:
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(self.db_file), exist_ok=True)
             with open(self.db_file, 'w', encoding='utf-8') as f:
                 json.dump(self.data, f, indent=2, ensure_ascii=False)
         except IOError as e:

@@ -7,7 +7,7 @@ import requests
 import re
 from urllib.parse import urlparse
 import json
-from config import BOT_TOKEN, ADMIN_ID, LANGUAGES, DONATION_INFO, DOWNLOAD_SETTINGS
+from config import BOT_TOKEN, ADMIN_ID, LANGUAGES, DONATION_INFO, DOWNLOAD_SETTINGS, RENDER_PORT, WEBHOOK_URL, WEBHOOK_PATH
 from video_downloader import VideoDownloader
 from database import get_user_language as db_get_user_language, set_user_language as db_set_user_language, db
 
@@ -47,7 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if user has selected language
     user_lang = db_get_user_language(user_id)
-    if not user_lang or user_lang == 'uz':
+    if not user_lang:
         # Check if user has explicitly set language before
         user_info = db.get_user_info(user_id)
         if not user_info.get('language_set'):
@@ -187,7 +187,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if user has selected language
     user_lang = db_get_user_language(user_id)
-    if not user_lang or user_lang == 'uz':
+    if not user_lang:
         # Check if user has explicitly set language before
         user_info = db.get_user_info(user_id)
         if not user_info.get('language_set'):
@@ -264,7 +264,11 @@ async def download_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Create temp directory if it doesn't exist
         temp_dir = DOWNLOAD_SETTINGS['temp_folder']
-        os.makedirs(temp_dir, exist_ok=True)
+        if os.getenv("RENDER"):
+            # On Render, use /tmp directory for temporary files
+            temp_dir = "/tmp"
+        else:
+            os.makedirs(temp_dir, exist_ok=True)
         
         # Generate unique filename
         import uuid

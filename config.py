@@ -1,6 +1,13 @@
-# Bot Configuration
-BOT_TOKEN = "8110277054:AAGlsNUWbpYJBKJnseAYuOP5UPGwozkbi1M"
-ADMIN_ID = 1982638634
+import os
+
+# Bot Configuration - Use environment variables for Render deployment
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8110277054:AAGlsNUWbpYJBKJnseAYuOP5UPGwozkbi1M")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "1982638634"))
+
+# Render deployment settings
+RENDER_PORT = int(os.getenv("PORT", "8080"))
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")
+WEBHOOK_PATH = "/webhook"
 
 LANGUAGES = {
     'uz': {

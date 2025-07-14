@@ -1314,6 +1314,9 @@ class VideoDownloader:
             # Clean the URL - fix escaped characters
             video_url = video_url.replace('\\/', '/').replace('\\u0026', '&').replace('\\u00253D', '=')
             
+            # Ensure directory exists for Render deployment
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+            
             response = self.session.get(video_url, stream=True, timeout=30)
             response.raise_for_status()
             
