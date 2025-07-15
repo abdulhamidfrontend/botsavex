@@ -210,7 +210,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     if context.user_data is None:
         context.user_data = {}
-    if context.user_data.get('waiting_for_feedback'):
+    # Faqat feedback rejimida bo‘lsa, feedbackni qabul qil
+    if context.user_data.get('waiting_for_feedback', False):
         thank_you_text = "✅ Fikringiz uchun raxmat!\n\nAdmin tez orada siz bilan bog'lanadi."
         await update.message.reply_text(thank_you_text)
         user_name = update.effective_user.first_name
@@ -219,6 +220,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=ADMIN_ID, text=admin_message)
         context.user_data['waiting_for_feedback'] = False
         return
+    # Aks holda, havola bo‘lsa — video yuklash
     if is_valid_video_url(message_text):
         await download_video(update, context)
     else:
