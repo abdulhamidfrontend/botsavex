@@ -16,16 +16,16 @@ class VideoDownloader:
         except Exception:
             pass
         return None
-    
+
     def download_video(self, video_url, filename):
         try:
             r = requests.get(video_url, stream=True)
             if r.status_code == 200:
-            with open(filename, 'wb') as f:
+                with open(filename, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-            return filename
+                        if chunk:
+                            f.write(chunk)
+                return filename
         except Exception:
             pass
-            return None
+        return None
