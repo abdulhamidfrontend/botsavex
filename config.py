@@ -42,20 +42,6 @@ LANGUAGES = {
     }
 }
 
-DONATION_INFO = {
-    'link': 'https://tirikchilik.uz/frxdvc',
-    'cards': [
-        {
-            'number': '4067 0700 0070 9266',
-            'holder': 'Hamidullayev Abdulhamid'
-        },
-        {
-            'number': '4231 2000 7103 8359',
-            'type': 'VISA'
-        }
-    ]
-}
-
 DOWNLOAD_SETTINGS = {
     'max_file_size': 50 * 1024 * 1024,  # 50MB
     'download_timeout': 30,  # seconds

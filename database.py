@@ -46,9 +46,6 @@ class SimpleDatabase:
         self.data["users"][str(user_id)].update(info)
         self._save_data()
 
-    def get_all_users(self):
-        return self.data.get("users", {})
-
 db = SimpleDatabase()
 
 def get_user_language(user_id):

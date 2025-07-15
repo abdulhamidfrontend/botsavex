@@ -2,11 +2,10 @@ import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
-from config import BOT_TOKEN, ADMIN_ID, LANGUAGES, DONATION_INFO, DOWNLOAD_SETTINGS
+from config import BOT_TOKEN, ADMIN_ID, LANGUAGES, DOWNLOAD_SETTINGS
 from video_downloader import VideoDownloader
 from database import get_user_language as db_get_user_language, set_user_language as db_set_user_language, db
 
-# Configure logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -24,11 +23,6 @@ def get_user_language(user_id):
 def get_text(user_id, key):
     lang = get_user_language(user_id)
     return LANGUAGES[lang][key]
-
-def get_donate_message(user_id):
-    lang = get_user_language(user_id)
-    donate_text = LANGUAGES[lang]['donate_message']
-    return donate_text
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user or not update.message:
@@ -62,7 +56,7 @@ async def show_language_selection(update: Update, context: ContextTypes.DEFAULT_
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await reply_func(
-        "🌐 Tilni tanlang / Выберите язык / Select language:",
+        get_text(update.effective_user.id, 'language_select'),
         reply_markup=reply_markup
     )
 
@@ -94,7 +88,7 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         no_username_text = "❌ Support yozish uchun @username bo'lishi kerak!\n\n📝 Username qo'shish uchun:\n1. Telegram sozlamalariga kiring\n2. Username qo'shing\n3. Qaytadan /support buyrug'ini yuboring"
         await update.message.reply_text(no_username_text)
         return
-    feedback_text = "💬 Fikringizni qoldiring:\n\nTez orada admin siz bilan bog'lanishadi."
+    feedback_text = get_text(user_id, 'support_message')
     await update.message.reply_text(feedback_text)
     if context.user_data is None:
         context.user_data = {}
@@ -103,7 +97,6 @@ async def support_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def donate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user or not update.message:
         return
-    user_id = update.effective_user.id
     keyboard = [
         [
             InlineKeyboardButton("🌐 Xavola orqali", url="https://tirikchilik.uz/frxdvc"),
@@ -111,7 +104,7 @@ async def donate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    donate_text = "💝 Donat qilish usulini tanlang:"
+    donate_text = get_text(update.effective_user.id, 'donate_message').split('\n')[0] + " usulini tanlang:"
     await update.message.reply_text(donate_text, reply_markup=reply_markup)
 
 async def donate_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -119,15 +112,8 @@ async def donate_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
     if query.data == "donate_card":
-        card_text = """💳 Karta raqamlar orqali donat qilish:
-
-🏦 4067 0700 0070 9266
-👤 Hamidullayev Abdulhamid
-
-💳 4231 2000 7103 8359
-🏦 VISA"""
+        card_text = get_text(query.from_user.id, 'donate_message')
         await query.edit_message_text(card_text)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -196,7 +182,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.effective_user or not update.message:
         return
     message_text = update.message.text
-    # Komanda bo‘lsa, qaytib ket
     if message_text and message_text.startswith('/'):
         return
     user_id = update.effective_user.id
@@ -210,7 +195,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     if context.user_data is None:
         context.user_data = {}
-    # Faqat feedback rejimida bo‘lsa, feedbackni qabul qil
     if context.user_data.get('waiting_for_feedback', False):
         thank_you_text = "✅ Fikringiz uchun raxmat!\n\nAdmin tez orada siz bilan bog'lanadi."
         await update.message.reply_text(thank_you_text)
@@ -220,7 +204,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=ADMIN_ID, text=admin_message)
         context.user_data['waiting_for_feedback'] = False
         return
-    # Aks holda, havola bo‘lsa — video yuklash
     if is_valid_video_url(message_text):
         await download_video(update, context)
     else:
